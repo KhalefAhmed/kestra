@@ -25,9 +25,11 @@ import java.util.Map;
 
 public class DockerService {
     public static DockerClient client(DockerClientConfig dockerClientConfig) {
-        DockerHttpClient dockerHttpClient = new ApacheDockerHttpClient.Builder()
+        DockerHttpClient dockerHttpClient = new RegistryAuthAwareDockerHttpClient(
+            new ApacheDockerHttpClient.Builder()
             .dockerHost(dockerClientConfig.getDockerHost())
-            .build();
+                .build()
+        );
 
         return DockerClientBuilder
             .getInstance(dockerClientConfig)
