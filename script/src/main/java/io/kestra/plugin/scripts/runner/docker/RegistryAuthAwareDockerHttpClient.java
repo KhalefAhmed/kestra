@@ -9,6 +9,8 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -25,6 +27,7 @@ public class RegistryAuthAwareDockerHttpClient implements DockerHttpClient {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final CloseableHttpClient httpClient = HttpClients.createDefault();
     private final Map<String, String> tokenCache = new HashMap<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(RegistryAuthAwareDockerHttpClient.class);
 
     public RegistryAuthAwareDockerHttpClient(DockerHttpClient delegate) {
         this.delegate = delegate;
@@ -33,6 +36,9 @@ public class RegistryAuthAwareDockerHttpClient implements DockerHttpClient {
     @Override
     public Response execute(Request request) {
         Response response = delegate.execute(request);
+        LOGGER.info("Executing request: {} {}", request.method(), request.path());
+        LOGGER.info("Response status: {}", response.getStatusCode());
+        LOGGER.info("Response headers: {}", response.getHeaders());
 
         if (response.getStatusCode() == 401) {
             String wwwAuthenticate = response.getHeader(HttpHeaders.WWW_AUTHENTICATE);
